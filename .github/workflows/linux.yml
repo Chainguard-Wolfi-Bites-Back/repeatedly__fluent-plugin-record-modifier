@@ -14,7 +14,7 @@ jobs:
           - ubuntu-latest
         experimental: [false]
         include:
-          - ruby-version: head
+          - ruby: head
             os: ubuntu-latest
             experimental: true
 
