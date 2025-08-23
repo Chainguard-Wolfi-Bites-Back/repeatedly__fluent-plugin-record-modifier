@@ -226,4 +226,23 @@ CONFIG
       ], d.filtered.map { |e| e.last }
     end
   end
+
+  def test_use_nil
+    require "fluent/version"
+    if Gem::Version.new(Fluent::VERSION) < Gem::Version.new("1.8.0")
+      omit "use_nil is only available in Fluentd 1.8.0 and higher"
+    end
+
+    d = create_driver %q[
+      <record>
+        test_key "#{use_nil}"
+      </record>
+    ]
+
+    d.run(default_tag: @tag) do
+      d.feed("k" => "v")
+    end
+
+    assert_equal [{"k" => "v", "test_key" => nil}], d.filtered.map(&:last)
+  end
 end
