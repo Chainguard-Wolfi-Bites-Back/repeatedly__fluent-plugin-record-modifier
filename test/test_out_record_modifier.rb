@@ -1,6 +1,7 @@
+require 'fluent/test'
 require 'fluent/test/driver/output'
 require 'fluent/plugin/out_record_modifier'
-
+require 'test/unit'
 
 class RecordModifierOutputTest < Test::Unit::TestCase
   def setup
@@ -138,5 +139,25 @@ class RecordModifierOutputTest < Test::Unit::TestCase
     end
 
     assert_equal [{"k1" => 'v', "k2" => 'v', 'foo' => 'bar'}], d.events.map { |e| e.last }
+  end
+
+  def test_use_nil
+    require "fluent/version"
+    if Gem::Version.new(Fluent::VERSION) < Gem::Version.new("1.8.0")
+      omit "use_nil is only available in Fluentd 1.8.0 and higher"
+    end
+
+    d = create_driver %q[
+      tag foo.filtered
+      <record>
+        test_key "#{use_nil}"
+      </record>
+    ]
+
+    d.run(default_tag: "test_tags") do
+      d.feed("k" => "v")
+    end
+
+    assert_equal [{"k" => "v", "test_key" => nil}], d.events.map(&:last)
   end
 end
